@@ -236,6 +236,110 @@ React.render(myElement, document.body);
 ```js
 <div data-custom-attribute="foo" />
 ```
+#### Javascript表达式
+在JSX语法中写Javascript表达式只需要用 {} 即可，除了字符串title=“TTT”，其他变量都用{}包裹.
+属性表达式
+```js
+React.render(
+    <div className={2 > 1 ? 'class-a' : 'class-b'}>content</div>,
+    document.body
+);
+```
+子表达式
+```js
+var Nav = React.createClass({
+  render: function () {
+    return <div>nav</div>
+  }
+});
+React.render(
+  <div>
+    {2 > 1 ? <Nav/> : <div>div</div>}
+  </div>,
+  document.body
+);
+```
+不过要注意的是，JSX语法只是语法糖，它的背后是调用 ReactElement 的构造方法 React.createElement 的，所以类似这样的写法是不可以的：
+``` js
+// This JSX:
+<div id={if (condition) { 'msg' }}>Hello World!</div>
+
+// Is transformed to this JS:
+React.createElement("div", {id: if (condition) { 'msg' }}, "Hello World!");
+```
+可以从转化后的Javascript代码中看出明显的语法错误，所以要不用三目运算符，要不就这样写：
+``` js
+if (condition) <div id='msg'>Hello World!</div>
+else <div>Hello World!</div>
+```
+有些属性可能是后续添加的，我们没办法一开始就确定，我们可能会写出下面不好的代码：
+``` js
+var component = <Component />;
+component.props.foo = x; // bad
+component.props.bar = y; // also bad
+``` 
+#### 延伸属性
+``` js 
+var props = {};
+props.foo = x;
+props.bar = y;
+var component = <Component {...props} />;
+//或者
+var props = { foo: x, bar: y };
+var component = <Component { ...props } />;
+```
+这样就相当于：
+``` js
+var component = <Component foo={x} bar={y} />
+```
+当需要拓展我们的属性的时候，定义个一个属性对象，并通过 {…props} 的方式引入，在JSX中，可以使用 ... 运算符，表示将一个对象的键值对与 ReactElement 的 props 属性合并，这个 ... 运算符的实现类似于ES6 Array中的 ... 运算符的特性。，React会帮我们拷贝到组件的props属性中。重要的是—这个过程是由React操控的，不是手动添赋值的属性。
+
+它也可以和普通的XML属性混合使用，需要同名属性，后者将覆盖前者：
+``` js 
+var props = { foo: 'default' };
+var component = <Component {...props} foo={'override'} />;
+console.log(component.props.foo); // 'override'
+``` 
+### JSX 陷阱
+#### style属性
+在React中写行内样式时，要这样写，不能采用引号的书写方式
+``` js 
+React.render(
+    <div style={{color:'red'}}>
+        xxxxx
+    </div>,
+    document.body
+);
+```
+#### HTML转义
+比如我们有一些内容是用户输入的富文本，从后台取到数据后展示在页面上，希望展示相应的样式
+``` js 
+var content='<strong>content</strong>';
+
+React.render(
+    <div>{content}</div>,
+    document.body
+);
+```
+结果页面直接输出内容了：
+``` js 
+<strong>content</strong>
+```
+React默认会进行HTML的转义，避免XSS攻击，如果要不转义，可以这么写：
+``` js 
+var content='<strong>content</strong>';    
+
+React.render(
+    <div dangerouslySetInnerHTML={{__html: content}}></div>,
+    document.body
+);
+```
+
+
+
+
+
+
 
 
 
