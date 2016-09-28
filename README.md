@@ -461,6 +461,188 @@ handler.remove(); // detach event listener
 ```
 另一个选择是 [bean](https://github.com/fat/bean) ，达到了 IE6+ 级别的兼容性。
 
+### document.ready
+React 作为一个 view 层框架，通常情况下页面只有一个用于渲染 React 页面组件的根节点 div，因此 document.ready，只需把脚本放在这个 div 后面执行即可。而对于渲染完成后的回调，我们可以使用 React 提供的 componentDidMount 生命周期。
+``` js 
+import React from 'react';
+class Demo extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+    
+    componentDidMount() {
+        doSomethingAfterRender(); // 在组件渲染完成后执行一些操作，如远程获取数据，检测 DOM 变化等。
+    }
+    render() {
+        return (
+            <div>just a demo</div>
+        );
+    }
+}
+```
+### attr 方法
+jQuery 使用 attr 方法，获取 Dom 元素的属性。在 React 中也可以配合 Ref 直接读取 DOM 元素的属性。
+``` js 
+import React from 'react';
+class Demo extends React.Component {
+    constructor(props) {
+        super(props);
+    }
+    
+    componentDidMount() {
+        this.rootNode.scrollLeft = 10; // 渲染后将外层的滚动调至 10px
+    }
+    render() {
+        return (
+            <div 
+                ref={(c) => this.rootNode = c} 
+                style={{ width: '100px', overflow: 'auto' }}
+            > 
+                <div style={{ width: '1000px' }}>just a demo</div>
+            </div>
+        );
+    }
+}
+``` 
+但是，在大部分的情况下，我们完全不需要做，因为 React 的单向数据流和数据驱动渲染，我们可以不通过 DOM，轻松拿到和修改大部分我们需要的 DOM 属性。
+``` js 
+import React from 'react';
+class Demo extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            link: '//www.taobao.com',
+        };
+        this.getLink = this.getLink.bind(this);
+        this.editLink = this.editLink.bind(this);
+    }
+    
+    getLink() {
+        alert(this.state.link);
+    }
+    
+    editLink() {
+        this.setState({
+            link: '//www.tmall.com',
+        });
+    }
+    
+    render() {
+        return (
+            <div>
+                <a href={this.state.link}>跳转链接</a>
+                <button onClick={this.getLink}>获取链接</button>
+                <button onClick={this.editLink}>修改链接</button>
+            </div>
+        );
+    }
+    
+}
+```
+### addClass/removeClass/toggleClass
+在 React 中通过数据驱动和第三库 classnames 修改样式从未如此轻松。
+``` js 
+.fn-show {
+    display: block;
+}
+.fn-hide {
+    display: none;
+}
+```
+``` js 
+import React from 'react';
+import classnames from 'classnames';
+class Demo extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            show: true,
+        };
+        this.changeShow = this.changeShow.bind(this);
+    }
+    
+    changeShow() {
+        this.setState({
+            show: !this.state.show, 
+        });
+    }
+    
+    render() {
+        return (
+            <div>
+                <a 
+                    href="//www.taobao.com" 
+                    className={classnames({
+                        'fn-show': this.state.show,
+                        'fn-hide': !this.state.show,
+                    })}
+                >
+                    跳转链接
+                </a>
+                <button onClick={this.changeShow}>改变现实状态</button>
+            </div>
+        );
+    }
+    
+}
+```
+### css
+在 React 中，我们可以直接设置 DOM 的 style 属性，如果想改变，和上面的 class 一样，用数据去驱动。
+``` js 
+import React from 'react';
+class Demo extends React.Component {
+    constructor() {
+        super(props);
+        this.state = {
+            backgorund: 'white',
+        };
+        this.handleClick = this.handleClick.bind(this);
+    }
+    
+    handleClick() {
+        this.setState({
+            background: 'black',
+        });
+    }
+    
+    render() {
+        return (
+            <div 
+                style={{
+                    background: this.state.background,
+                }}
+            >
+                just a demo
+                <button onClick={this.handleClick}>change Background Color</button>
+            </div>
+        );
+    }
+}
+```
+### 数据存储
+react 反而是更擅长管理数据,利用 state 或者 内部变量(this.xxx) 来保存，在整个生命周期，我们都可以拿到这些数据进行比较和修改。
+
+### Ajax
+Ajax 确实是在处理兼容性问题上一块令人比较头疼的地方，要兼容各种形式的 Xhr 不说，还有 jsonp 这个不属于 ajax 的功能也要同时考虑，好在已经有了很好的第三方库帮我们解决了这个问题，这里向大家推荐 [natty-fetch](https://www.npmjs.com/package/natty-fetch) ，一个兼容 IE8 的fetch 库，在 API 设计上向 fetch 标准靠近，而又保留了和 jQuery 类似的接口，熟悉 $.ajax 应该可以很快的上手。
+
+### 动画
+React 在动画方面提供了一个插件 [ReactCSSTransitionGroup](https://facebook.github.io/react/docs/animation.html#high-level-api-reactcsstransitiongroup) ，和它的低级版本 [ReactTransitionGroup](https://facebook.github.io/react/docs/animation.html#low-level-api-reacttransitiongroup) ，注意这里的低级并不是退化版本，而是更加基础的暴露更多 API 的版本。
+
+这个插件的灵感来自于 Angular 的 ng-animate，在设计思路上也基本保持一致。通过指定 Transition 的类名，比如 example ，在元素进场和退场的时候分别加上对应的类名，以实现 CSS3 动画。例如本例中，进场会添加 example-enter 和 example-enter-active 到对应的元素 ，而在退场 example-leave 和 example-leave-active 类名。当然你也可以指定不同的进场退场类名。而对应入场，React 也区分了两种类型，一种是 ReactCSSTransitionGroup 第一次渲染时(appear)，而另一种是 ReactCSSTransitionGroup 已经渲染完成后，有新的元素插入进来(enter)，这两种进场可以使用 prop 进行单独配置，禁止或者修改超时时长。具体的例子，在上面给出的链接中有详细的例子和说明，因此本文不再赘述
+
+但这个插件最多只提供了做动画的方案，如果我想在动画进行的过程中做一些其他事情呢？他就无能为力了，这时候就轮到 ReactTransitionGroup 出场了。ReactTransitionGroup 为他包裹的动画元素提供了六种新的生命周期： componentWillAppear(callback) , componentDidAppear() , componentWillEnter(callback) , componentDidEnter() , componentWillLeave(callback) , componentDidLeave() 。这些 hook 可以帮助我们完成一些随着动画进行需要做的其他事。
+
+但官方提供的插件有一个不足点，动画只是在进场和出场时进行的，如果我的组件不是 mount/unmount，而只是隐藏和显示怎么办？这里推荐一个第三方库： rc-animate ，从 API 设计上他基本上是延续了 ReactCSSTransitionGroup 的思路，但是通过引入 showProp 这一属性，使他可以 handle 组件显示隐藏这一情况下的出入场动画（只要将组件关于 show/hide 的属性传给 showProp 即可），同时这个库也提供自己的 hook，来实现 appear/enter/leave 时的回调。
+
+如果你说我并不满足只是进场和出场动画，我要实现类似鼠标拖动时的实时动画，我需要的是一个 js 动画库，这里向大家推荐一个第三方库： [react-motion](https://www.npmjs.com/package/react-motion) , react-motion 一个很大的特点是，有别以往使用贝塞尔曲线来定义动画节奏，引入了刚度和阻尼这些弹簧系数来定义动画，按照作者的说法，与其纠结动画时长和很难掌握的贝塞尔表示法，通过不断调整刚度和阻尼来调试出最想要的弹性效果才是最合理的。Readme 里提供了一系列的很炫的动画效果，比如这个 [draggable list](http://chenglou.github.io/react-motion/demos/demo8-draggable-list/) 。Motion 通过指定 defaultStyle、style，传回给子组件正在变化中的 style，从而实现 js 动画。
+
+``` js 
+<Motion defaultStyle={{x: 0}} style={{x: spring(10)}}>
+  {interpolatingStyle => <div style={interpolatingStyle} />}
+</Motion>
+```
+
+
 
 
 
