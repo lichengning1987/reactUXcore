@@ -334,6 +334,137 @@ React.render(
     document.body
 );
 ```
+### 选取 DOM 元素
+在 React 中，我们可以使用 ref 来更有针对性的获取元素。
+``` js 
+import React from 'react';
+class Demo extends React.Compoent {
+
+    getDomNode() {
+        return this.refs.root; // 获取 Dom Node
+    }
+    render() {
+        return (
+            <div ref="root">just a demo</div>
+        );
+    }
+}
+```
+上面介绍了简单的ref写法，如果用 React 推荐的写法，我们可以这样写
+``` js 
+import React from 'react';
+import ReactDOM from 'react-dom';
+class Sub extends React.Compoent {
+    getDomNode() {
+        return this.rootNode;
+    }
+    render() {
+        return (
+            <div ref={(c) => this.rootNode = c}>a sub component</div>
+        );
+    }
+}
+class Demo extends React.Compoent {
+
+    getDomNode() {
+        return this.rootNode; // 获取 Dom Node
+    }
+    
+    getSubNode() {
+        return this.sub.getDomNode(); // 获取子组件根节点
+    }
+    render() {
+        return (
+            <div ref={(c) => this.rootNode = c}>
+                <Sub ref={(c) => this.sub = c} />
+            </div>
+        );
+    }
+}
+```
+### DOM 操作
+- React 通过数据驱动的思想，通过改变 view 对应的数据，轻松实现 DOM 的增删操作。
+``` js 
+class Demo extends React.Compoent {
+    constructor(props) {
+        super(props);
+        this.state = {
+            list: [1, 2, 3],
+        }；
+        this.addItemFromBottom = this.addItemFromBottom.bind(this);
+        this.addItemFromTop = this.addItemFromTop.bind(this);
+        this.deleteItem = this.deleteItem.bind(this);
+    }
+    
+    addItemFromBottom() {
+        this.setState({
+            list: this.state.list.concat([4]),
+        });
+    }
+    
+    addItemFromTop() {
+        this.setState({
+            list: [0].concat(this.state.list),
+        });
+    }
+    
+    deleteItem() {
+        const newList = [...this.state.list];
+        newList.pop();
+        this.setState({
+            list: newList,
+        });
+    }
+    
+    render() {
+        return (
+            <div>
+                {this.state.list.map((item) => <div>{item}</div>)}
+                <button onClick={this.addItemFromBottom}>尾部插入 Dom 元素</button>
+                <button onClick={this.addItemFromTop}>头部插入 Dom 元素</button>
+                <button onClick={this.deleteItem}>删除 Dom 元素</button>
+            </div>
+        );
+    }
+}
+```
+### 事件的监听
+- React 通过根节点代理的方式，实现了一套很优雅的事件监听方案，在组件 unmount 时也不需要自己去处理内存回收相关的问题，非常的方便。
+``` js 
+import React from 'react';
+class Demo extends React.Component {
+    constructor(props) {
+        super(props);
+        this.handleClick = this.handleClick.bind(this);
+    }
+    handleClick() {
+        alert('我是弹窗')；
+    }
+    render() {
+        return (
+            <div onClick={this.handleClick}>点击我弹出弹框</div>
+        );
+    }
+}
+```
+这里有一个小细节就是 bind 的时机，bind 是为了保持相应函数的上下文，虽然也可以在 onClick 那里 bind，但这里选择在 constructor 里 bind 是因为前者会在每次 render 的时候都进行一次 bind，返回一个新函数，是比较消耗性能的做法。
+
+但 React 的事件监听，毕竟只能监听至 root component，而我们在很多时候要去监听 window/document 上的事件，如果 resize、scroll，还有一些 React 处理不好的事件，比如 scroll，这些都需要我们自己来解决。事件监听为了屏蔽差异性需要做很多的工作，这里像大家推荐一个第三方库来完成这部分的工作， add-dom-event-listener ，用法和原生的稍有区别，是因为这个库并不旨在做 polyfill，但用法还是很简单。
+
+``` js 
+var addEventListener = require('add-dom-event-listener');
+var handler = addEventListener(document.body, 'click', function(e){
+  console.log(e.target); // works for ie
+  console.log(e.nativeEvent); // native dom event
+});
+handler.remove(); // detach event listener
+```
+另一个选择是 [bean](https://github.com/fat/bean) ，达到了 IE6+ 级别的兼容性。
+
+
+
+
+
 
 
 
