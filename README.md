@@ -217,7 +217,7 @@ render() {
 
 
 ## react基础篇
-1.jsx语法：
+### jsx语法：
 - 标签闭合，渲染HTML标签，声明变量采用 首字母小写
 ```js
 var myDivElement = <div className="foo" />;
@@ -229,11 +229,13 @@ var MyComponent = React.createClass({/*...*/});
 var myElement = <MyComponent someProperty={true} />;
 React.render(myElement, document.body);
 ```
-不过需要注意的是 class 和 for 这两个属性，JSX语法最终是要被转换为纯Javascript的，所以要和在Javascript DOM中一样，用 className 和 htmlFor 。
+不过需要注意的是 class 和 for 这两个属性，JSX语法最终是要被转换为纯Javascript的，
+所以要和在Javascript DOM中一样，用 className 和 htmlFor 。
+
 如果一定要添加自定义属性，那么需要在这些自定义属性之前添加 data- 前缀。
 ```js
 <div data-custom-attribute="foo" />
 ```
-### Javascript表达式
+
 
 
