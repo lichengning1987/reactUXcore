@@ -218,12 +218,12 @@ render() {
 
 ## react基础篇
 1.jsx语法：
-标签闭合，渲染HTML标签，声明变量采用 首字母小写
+- 标签闭合，渲染HTML标签，声明变量采用 首字母小写
 ```js
 var myDivElement = <div className="foo" />;
 React.render(myDivElement, document.body);
 ```
-渲染React组件，声明变量采用 首字母大写
+- 渲染React组件，声明变量采用 首字母大写
 ```js
 var MyComponent = React.createClass({/*...*/});
 var myElement = <MyComponent someProperty={true} />;
