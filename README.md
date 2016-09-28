@@ -642,6 +642,12 @@ React 在动画方面提供了一个插件 [ReactCSSTransitionGroup](https://fac
 </Motion>
 ```
 
+### 注意点
+- 不要在constructor 里面使用this.props引用
+- require 注意大小写（和目录大小以一致），否则云构建失败
+- 如果state在初始化时，有数据来自props，则需要注意定义componentWillReceiveProps方法
+
+shouldComponentUpdate 
 
 
 
