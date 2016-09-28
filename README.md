@@ -216,7 +216,56 @@ render() {
 - 建议使用 [es6](http://es6.ruanyifeng.com/) 进行编码。
 
 
-## react基础篇
+## react入门
+### 核心思想
+- 响应式UI
+- 单向数据流（数据如何向上传递？）
+- 组件化
+### 预备知识
+- ES6:class、arrow function、object-shorthand
+- Babel:preset-es2015-ie、preset-react
+  https://github.com/Daniel15/babel-standalone
+- nowa:webpack、dev server、gulp
+### 技术要点
+- JSX语法： 命名、标签闭合、属性写法、特殊属性、行内样式
+- 组件渲染：ReactDom.render()
+- 组件定义：extends React.Component,constructor(),render()
+- 事件绑定：constructor bind,arrow function
+- State和Props
+- 获取真实DOM节点：ref
+- 组件的生命周期
+  componentDidMount
+  componentWillReceiveProps
+  shouldComponentUpdate
+  http://groups.alidemo.cn/uxcore/doc/react/lifecircle.html
+### Ajax请求
+- 时机
+  - 初始化 componentDidMount
+  - 用户操作：event callback
+- Natty-Fetch or jQuery
+- 请求回调：setState
+
+### 注意点
+- 不要在constructor 里面使用this.props引用
+- require 注意大小写（和目录大小以一致），否则云构建失败
+- 如果state在初始化时，有数据来自props，则需要注意定义componentWillReceiveProps方法
+- 在render方法中尽量减少代码逻辑
+- shouldComponentUpdate 
+  组件在决定重新渲染（虚拟dom比对完毕生成最终的dom后）之前会调用该函数
+  该函数将是否重新渲染的权限交给了开发者，该函数默认直接返回true，表示默认直接出发dom更新：
+  shouldComponentUpdate: function(nextProps, nextState) {
+    return true;
+  }  
+### 学习框架
+- UXCore 
+  http://uxco.re
+  http://groups.alidemo.cn/uxcore/doc/
+- nowa
+  http://nowa-webpack.github.io/docs/
+- Tingle/SaltUI
+  http://alinw.alicdn.com/platform/tingle-ui/1.0.3/docs/docs.html
+
+
 ### jsx语法：
 - 标签闭合，渲染HTML标签，声明变量采用 首字母小写
 ```js
@@ -641,14 +690,6 @@ React 在动画方面提供了一个插件 [ReactCSSTransitionGroup](https://fac
   {interpolatingStyle => <div style={interpolatingStyle} />}
 </Motion>
 ```
-
-### 注意点
-- 不要在constructor 里面使用this.props引用
-- require 注意大小写（和目录大小以一致），否则云构建失败
-- 如果state在初始化时，有数据来自props，则需要注意定义componentWillReceiveProps方法
-
-shouldComponentUpdate 
-
 ### 布尔属性、表达式与注释（JSX语法）
 ``` js
 // 禁用样式的按钮
@@ -753,7 +794,7 @@ componentDidUpdate:可以修改DOM
 componentWillUnMount:在删除组件之前进行清理操作，比如计时器和事件监听器。
 ``` 
 
-### 什么时候使用状态
+### 什么时候使用状态state
 你的大部分组件应该只需从props中取一些数据并渲染它。然而，
 有时你需要对用户输入、服务器请求或时间的推移作出反应。为此您使用state状态。
 尽可能保持尽可能多的组件成为可能的state状态。
@@ -765,6 +806,8 @@ componentWillUnMount:在删除组件之前进行清理操作，比如计时器�
 this.state应该只包含需要代表你的UI状态的最小数据量，不要包含计算数据、反应元件（基于基本的道具和状态建立他们）
 - 影响到render方法（需要的更新图）
 - 组件内部改变值
+### 什么时候使用props
+props是父组件传递到子组件上时使用
 
 
 
