@@ -649,8 +649,122 @@ React 在动画方面提供了一个插件 [ReactCSSTransitionGroup](https://fac
 
 shouldComponentUpdate 
 
+### 布尔属性、表达式与注释（JSX语法）
+``` js
+// 禁用样式的按钮
+<input type="button" disabled />;
+<input type="button" disabled={true} />;
+
+// 正常使用的按钮
+<input type="button" />;
+<input type="button" disabled={false} />;
+
+// 输入 (JSX):
+var content = <Container>{window.isLoggedIn ? <Nav /> : <Login />}</Container>;
+// 三元运算符，window.isLoggedIn 存在输出<Nav />组件，否则输出<Login/>组件
+
+// 输出 (JS):
+var content = React.createElement(
+  Container,
+  null,
+  window.isLoggedIn ? React.createElement(Nav) : React.createElement(Login)
+);
 
 
+var content = (
+  <Nav>
+    {/* 子组件注释，加上 {} 花括号 */}
+    <Person
+      /* 组件
+         属性
+         注释
+       */
+      name={window.isLoggedIn ? window.name : ''} // end of line comment
+    />
+  </Nav>
+);
+```
+### 属性传入组件的多种方式（JSX语法）
+``` js
+//变量放在{}中
+var component = <Component foo={x} bar={y} />;
+
+
+var component = <Component />;
+component.props.foo = x; // 不推荐，最丑的做法
+component.props.bar = y; // 不推荐，颜值低得人可以这么干
+
+//传入对象的方式传入属性
+var props = {};
+props.foo = x;
+props.bar = y;
+var component = <Component {...props} />;
+
+//注意,后面会覆盖前面的
+var props = { foo: 'default' };
+var component = <Component {...props} foo={'override'} />;
+console.log(component.props.foo); // 输出为'override'
+```
+
+### JSX 陷阱（JSX做了一些处理防止XSS攻击）
+``` js
+// 会显示 “First · Second” 
+<div>{'First · Second'}</div>
+
+// 它会显示 "First · Second"
+<div>First · Second</div>
+
+// 正确做法，帅的人都这么干
+<div>{'First \u00b7 Second'}</div>
+<div>{'First ' + String.fromCharCode(183) + ' Second'}</div>
+// 同时你还可以这样玩，加上[]，以数组的形式。
+<div>{['First ', <span>·</span>, ' Second']}</div>
+
+//但是有的适合，我的项目中就需要这样干，就要原来的。
+//给dangerouslySetInnerHTML传入一个对象，其中有一个__html属性，其中写了你的文本。
+<div dangerouslySetInnerHTML={{__html: 'First · Second'}} />
+
+//假如你想加上自定义属性，必须加上data-前缀
+//以aria-开头的属性页可以被渲染出来
+<div data-custom-attribute="foo" />
+<div aria-hidden={true} />
+```
+### 组件生命周期（别纠结这是干什么，纠结你就输了，先看一看文字，不用去弄懂他们，跳过都行，细节后面在讲解）
+``` js
+初始化阶段
+getDefaultPropos：只调用一次，实力之间共享引用
+getInitialState：初始化每个实例特有的状态
+componentWillMount：render之前最后一次修改状态的机会
+render：只能访问this.props和this.state，只有一个顶层组件，不允许修改状态和DOM输出
+componentDidMount：成功render并渲染完成真实DOM后触发，可以修改DOM
+```
+
+``` js
+运行中阶段
+componentWillReceiveProps:父组件修改属性触发，可以修改新属性，修改状态
+shouldComponentUpdate:返回false会阻止render调用
+componentWillUpeate:不能修改属性和状态
+render:只能访问this.props和this.state，只有一个顶层组件，不允许修改状态和DOM输出
+componentDidUpdate:可以修改DOM
+```
+
+``` js
+销毁阶段：
+componentWillUnMount:在删除组件之前进行清理操作，比如计时器和事件监听器。
+``` 
+
+### 什么时候使用状态
+你的大部分组件应该只需从props中取一些数据并渲染它。然而，
+有时你需要对用户输入、服务器请求或时间的推移作出反应。为此您使用state状态。
+尽可能保持尽可能多的组件成为可能的state状态。
+通过这样做，您将分离到它最合乎逻辑的地方，并尽量减少冗余。
+一个常见的模式是创建多个无状态的组件，只是提供props数据，
+并有一个有state状态的组件上面，通过其state状态通过子组件的层次。
+有状态组件封装了所有的交互逻辑，而无状态的组件专注呈现数据。
+建设一个有状态的组件时，考虑其状态的最小可能性，
+this.state应该只包含需要代表你的UI状态的最小数据量，不要包含计算数据、反应元件（基于基本的道具和状态建立他们）
+- 影响到render方法（需要的更新图）
+- 组件内部改变值
 
 
 
